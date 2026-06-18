@@ -17,7 +17,7 @@ Resources:
   ExamenEC2Instance:
     Type: 'AWS::EC2::Instance'
     Properties:
-      InstanceType: t2.micro
+      InstanceType: t3.micro
       ImageId: ami-0bb84b8ffd87024d8 # ID estandar para la region us-east-1
       SecurityGroups:
         - Ref: ExamenSecurityGroup
