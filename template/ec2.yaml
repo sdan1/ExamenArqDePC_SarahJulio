@@ -1,0 +1,90 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Template para despliegue de una EC2 con servidor Apache - Examen Final Sarah Julio.'
+
+Resources:
+  # 1. Security Group con Puerto 80 habilitado
+  ExamenSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'Habilitar acceso HTTP por el puerto 80'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  # 2. Instancia EC2 Amazon Linux 2023
+  ExamenEC2Instance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-0bb84b8ffd87024d8 # ID estandar para la region us-east-1
+      SecurityGroups:
+        - Ref: ExamenSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          dnf update -y
+          dnf install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+          cat << 'EOF' > /var/www/html/index.html
+          <!DOCTYPE html>
+          <html lang="es">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Examen Final Arquitectura</title>
+              <style>
+                  body {
+                      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                      background-color: #f4f7f6;
+                      margin: 0;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      height: 100vh;
+                  }
+                  .card {
+                      background: #ffffff;
+                      padding: 40px;
+                      border-radius: 10px;
+                      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                      text-align: center;
+                  }
+                  h1 { color: #2c3e50; font-size: 24px; margin-bottom: 20px; }
+                  p { color: #7f8c8d; font-size: 18px; margin: 10px 0; }
+                  .data { font-weight: bold; color: #16a085; }
+                  button {
+                      background-color: #16a085;
+                      color: white;
+                      border: none;
+                      padding: 10px 20px;
+                      border-radius: 5px;
+                      cursor: pointer;
+                      font-size: 16px;
+                      margin-top: 15px;
+                  }
+                  button:hover { background-color: #117a65; }
+              </style>
+          </head>
+          <body>
+              <div class="card">
+                  <h1>Examen Final Arquitectura de Computadores</h1>
+                  <p><strong>Estudiante:</strong> <span class="data">Sarah Julio</span></p>
+                  <p><strong>Código:</strong> <span class="data">0192340</span></p>
+                  <button onclick="verificar()">Validar Interactividad</button>
+              </div>
+              <script>
+                  function verificar() {
+                      alert("¡Servidor HTTP e interactividad JavaScript funcionando correctamente en AWS!");
+                  }
+              </script>
+          </body>
+          </html>
+          EOF
+
+Outputs:
+  SitioWebURL:
+    Description: 'URL publica de la pagina web'
+    Value: !Sub 'http://${ExamenEC2Instance.PublicIp}'
